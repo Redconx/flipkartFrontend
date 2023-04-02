@@ -1,0 +1,250 @@
+import {Dialog,styled,Box,TextField,Typography,Button, CircularProgress} from "@mui/material";
+import React,{useState,useContext} from "react";
+import { DataContext } from "../../context/dataProvider";
+import { authenticateSignup,authenticateLogin } from "../../services/api";
+import auth from "../../services/auth";
+
+const accountInitialValues = {
+  login: {
+    view: "login",
+    heading: "Login",
+    subHeading: "Get access to your Orders,Wishlist and Recommendations",
+  },
+  signup: {
+    view: "signup",
+    heading: "Looks like you're new here!",
+    subHeading: "Sign up with your mobile number to get started",
+  },
+};
+
+let signupInitialValues = {
+  firstname: "",
+  lastname: "",
+  username: "",
+  email: "",
+  password: "",
+  phone: "",
+};
+let loginValues={
+    username:"",
+    password:""
+}
+function LoginDialogue ({ open, setOpen,setUser }) {
+  const [account1, toggleAccount] = useState(accountInitialValues.login);
+  const [err,setErr]=useState(false)
+  const [err1,setErr1]=useState(false)
+  const [loading,setLoading]=useState(false)
+//   const [signup, setSignup] = useState(signupInitialValues);
+//   const [account, setAccount] = useContext(DataContext);
+  const {account,setAccount} = useContext(DataContext);
+
+  const handleClose = () => {
+    setOpen(false);
+    setErr(false)
+    setErr1(false)
+    toggleAccount(accountInitialValues.login);
+ signupInitialValues = {
+      firstname: "",
+      lastname: "",
+      username: "",
+      email: "",
+      password: "",
+      phone: "",
+    };
+   
+  };
+
+  const Component = styled(Box)`
+    height: 70vh;
+    width: 90vh;
+    display: flex;
+  `;
+  const Image = styled(Box)`
+    background: #2874f0
+      url(https://static-assets-web.flixcart.com/www/linchpin/fk-cp-zion/img/login_img_c4a81e.png)
+      center 85% no-repeat;
+    height: 81%;
+    width: 29%;
+    padding: 44px 35px;
+    & > p,
+    & > h5 {
+      color: #fff;
+      font-weight: 550;
+    }
+  `;
+  const Wrapper = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    padding: 25px 35px;
+    flex: 1;
+    & > div,
+    & > p,
+    & > button {
+      margin-top: 20px;
+    }
+  `;
+  const LoginButton = styled(Button)`
+    text-transform: none;
+    background: #fb641b;
+    color: #fff;
+    height: 48px;
+    border-radius: 2px;
+  `;
+  const RequestOPT = styled(Button)`
+    text-transform: none;
+    background: #fff;
+    color: #2874f0;
+    height: 48px;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0/20%);
+  `;
+  const Text = styled(Typography)`
+    font-size: 12px;
+    color: #878787;
+  `;
+  const CreateAccount = styled(Typography)`
+    font-size: 14px;
+    text-align: center;
+    color: #2874f0;
+    font-weight: 600;
+    cursor: pointer;
+  `;
+  const Error = styled(Typography)`
+    font-size: 10px;
+    color: red;
+    line-height: 0px;
+    margin-top: 10px;
+    font-weight: 600;
+  `;
+
+  const loginImg =
+    "https://static-assets-web.flixcart.com/www/linchpin/fk-cp-zion/img/login_img_c4a81e.png";
+
+  const toggleSignUp = () => {
+    toggleAccount(accountInitialValues.signup);
+  };
+
+  const onInputChange = (e) => {
+    signupInitialValues[e.currentTarget.name] = e.currentTarget.value;
+    
+  };
+  const onValueChange=(e)=>{
+    loginValues[e.currentTarget.name] = e.currentTarget.value;
+  }
+const loginUser = async () => {
+  setLoading(true)
+  let response = await authenticateLogin(loginValues);
+  setLoading(false)
+  console.log('response',response)
+  if (response.status === 200) {
+    // setAccount(response.data.firstname);
+    auth.login(response.data.firstname)
+    setUser(response.data.firstname)
+    handleClose();
+  }
+  else{
+    setErr(true)
+  }
+};
+  const singupUser = async () => {
+    let response = await authenticateSignup(signupInitialValues);
+    
+    // if (!response.data) return;
+    
+    if(response.status===200) {
+      // setAccount(signupInitialValues.firstname);
+      setUser(signupInitialValues.firstname)
+      auth.login(signupInitialValues.firstname)
+      handleClose();
+    }else{
+      setErr1(true)
+    }
+  };
+  return (
+    <Dialog
+      open={open}
+      onClose={() => handleClose()}
+      PaperProps={{ sx: { maxWidth: "unset" } }}
+    >
+      <Component>
+        <Image>
+          <Typography variant="h5">{account1.heading}</Typography>
+          <Typography style={{ marginTop: 20 }}>
+            {account1.subHeading}
+          </Typography>
+        </Image>
+        {account1.view === "login" ? (
+          <Wrapper>
+            <TextField variant="standard" label="Enter Username" onChange={onValueChange} name='username'/>
+
+            {err && <Error color="red">Invalid Username or password</Error>}
+
+            <TextField variant="standard" label="Enter Password"  onChange={onValueChange} name='password'/>
+            <Text>
+              By continuing, you agree to flipkart's Terms of Use and Privacy
+              Policy
+            </Text>
+
+
+            <LoginButton onClick={()=>loginUser()}>Login<Box style={{margin:10,display:'flex'}}>{loading? <CircularProgress size={20} color={'inherit'}/>:""}</Box></LoginButton>
+            
+        
+
+
+            <Typography style={{ textAlign: "center" }}>OR</Typography>
+            <RequestOPT>Request OTP</RequestOPT>
+            <CreateAccount onClick={() => toggleSignUp()}>
+              New to Flipkart? Create an account
+            </CreateAccount>
+          </Wrapper>
+        ) : (
+          <Wrapper>
+            {err1 && <Error color="red">Username already exist</Error>}
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Firstname"
+              name="firstname"
+              
+            />
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Lastname"
+              name="lastname"
+              
+            />
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Username"
+              name="username"
+            />
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Email"
+              name="email"
+            />
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Password"
+              required
+              name="password"
+            />
+            <TextField
+              variant="standard"
+              onChange={onInputChange}
+              label="Enter Phone"
+              name="phone"
+            />
+
+            <LoginButton onClick={() => singupUser()}>Continue</LoginButton>
+          </Wrapper>
+        )}
+      </Component>
+    </Dialog>
+  );
+};
+export default LoginDialogue;
