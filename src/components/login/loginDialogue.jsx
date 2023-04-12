@@ -102,7 +102,7 @@ function LoginDialogue ({ open, setOpen,setUser }) {
     & > div,
     & > p,
     & > button {
-      margin-top: 0px;
+      margin-top: 10px;
     }
   `;
   const LoginButton = styled(Button)`
