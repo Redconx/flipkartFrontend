@@ -1,4 +1,4 @@
-import { Typography, Box, Menu, MenuItem, styled } from "@mui/material";
+import { Typography, Box, Menu, MenuItem, styled ,useTheme, Button} from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
@@ -14,10 +14,14 @@ const Logout = styled(Typography)`
 const Profile = ({ account ,setUser}) => {
   const [open, setOpen] = useState(false);
   const navigate=useNavigate()
+
+
   const handleClick = (event) => {
     setOpen(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleClose = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
     setOpen(false);
   };
   const logoutUser = () => {
@@ -27,31 +31,46 @@ const Profile = ({ account ,setUser}) => {
     handleClose();
     navigate("/")
   };
+  const theme = useTheme();
   return (
     <>
-      <Box onClick={handleClick}>
-        <Typography style={{ marginTop: 2, cursor: "pointer" }}>
+      <div onMouseLeave={handleClose}>
+        <Typography  onMouseOver={handleClick}
+            style={{ marginTop: 2, cursor: "pointer" }} >
           {account}
         </Typography>
         <Component
           anchorEl={open}
           open={Boolean(open)}
           onClose={handleClose}
+          onMouseLeave={handleClose}
+          // anchorOrigin={{
+          //   vertical: "bottom",
+          //   horizontal: "center"
+          // }}
+          // transformOrigin={{
+          //   vertical: "top",
+          //   horizontal: "center"
+          // }}
           MenuListProps={{
             "aria-labelledby": "basic-button",
+            onMouseLeave:(e)=>{
+              handleClose(e)
+            }
           }}
-        >
+          >
           <MenuItem
             onClick={() => {
               logoutUser();
             }}
-            onBlur={()=>handleClose()}
+            
+           
           >
             <PowerSettingsNewIcon color="primary" fontSize="small" />
             <Logout>Logout</Logout>
           </MenuItem>
         </Component>
-      </Box>
+      </div>
     </>
   );
 };

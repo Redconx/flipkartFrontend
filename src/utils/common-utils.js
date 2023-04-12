@@ -5,5 +5,5 @@ export const addEllipsis = (text) => {
   return text;
 };
 
-export const URL = "https://flip-a9xe.onrender.com";
-// export const URL = "http://localhost:2410";
+// export const URL = "https://flip-a9xe.onrender.com";
+export const URL = "http://localhost:2410";

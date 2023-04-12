@@ -1,5 +1,5 @@
 import {Dialog,styled,Box,TextField,Typography,Button, CircularProgress} from "@mui/material";
-import React,{useState,useContext} from "react";
+import React,{useState,useContext, useMemo, useEffect} from "react";
 import { DataContext } from "../../context/dataProvider";
 import { authenticateSignup,authenticateLogin } from "../../services/api";
 import auth from "../../services/auth";
@@ -25,7 +25,8 @@ let signupInitialValues = {
   password: "",
   phone: "",
 };
-let loginValues={
+
+let initLoginValues={
     username:"",
     password:""
 }
@@ -33,16 +34,35 @@ function LoginDialogue ({ open, setOpen,setUser }) {
   const [account1, toggleAccount] = useState(accountInitialValues.login);
   const [err,setErr]=useState(false)
   const [err1,setErr1]=useState(false)
-  const [loading,setLoading]=useState(false)
-//   const [signup, setSignup] = useState(signupInitialValues);
+  const [loading,setLoading]=useState(false);
+  const [loginValues, setLoginValues] = useState(initLoginValues);
+  const [signup, setSignup] = useState(signupInitialValues);
+  const [signup1, setSignup1] = useState({
+    firstname: "a",
+    lastname: "a",
+    username: "a",
+    email: "a",
+    password: "a",
+    phone: "a",
+  });
 //   const [account, setAccount] = useContext(DataContext);
   const {account,setAccount} = useContext(DataContext);
+  const [focusEle,setFocusEle] = useState("");
 
   const handleClose = () => {
     setOpen(false);
     setErr(false)
     setErr1(false)
     toggleAccount(accountInitialValues.login);
+    setLoginValues(initLoginValues)
+    setSignup(signupInitialValues)
+    setSignup1({  firstname: "a",
+    lastname: "a",
+    username: "a",
+    email: "a",
+    password: "a",
+    phone: "a",})
+
  signupInitialValues = {
       firstname: "",
       lastname: "",
@@ -53,6 +73,8 @@ function LoginDialogue ({ open, setOpen,setUser }) {
     };
    
   };
+
+
 
   const Component = styled(Box)`
     height: 70vh;
@@ -75,12 +97,12 @@ function LoginDialogue ({ open, setOpen,setUser }) {
   const Wrapper = styled(Box)`
     display: flex;
     flex-direction: column;
-    padding: 25px 35px;
+    padding: 0px 35px;
     flex: 1;
     & > div,
     & > p,
     & > button {
-      margin-top: 20px;
+      margin-top: 0px;
     }
   `;
   const LoginButton = styled(Button)`
@@ -125,14 +147,13 @@ function LoginDialogue ({ open, setOpen,setUser }) {
   };
 
   const onInputChange = (e) => {
-    signupInitialValues[e.currentTarget.name] = e.currentTarget.value;
-    
+    let obj={...signup}
+    obj[e.currentTarget.name]=e.currentTarget.value
+    setSignup(obj)   
+    setFocusEle(e.currentTarget.name); 
   };
-  const onValueChange=(e)=>{
-    loginValues[e.currentTarget.name] = e.currentTarget.value;
-  }
-const loginUser = async () => {
-  setLoading(true)
+  const loginUser = async () => {
+    setLoading(true)
   let response = await authenticateLogin(loginValues);
   setLoading(false)
   console.log('response',response)
@@ -146,7 +167,29 @@ const loginUser = async () => {
     setErr(true)
   }
 };
+const onValueChange=(e)=>{
+  // loginValues[e.currentTarget.name] = e.currentTarget.value;
+  let loginValuesCopy = {...loginValues};
+   loginValuesCopy[e.currentTarget.name] = e.currentTarget.value;
+  setLoginValues(loginValuesCopy);
+  setFocusEle(e.currentTarget.name);
+
+}
+
+useEffect(()=> {
+  document.getElementById(`${focusEle}`)?.focus();
+},[loginValues,signup])
+
+
+
   const singupUser = async () => {
+
+    setSignup1(signup)
+    // Object.
+    if(!signup.firstname||!signup.lastname||!signup.password||!signup.email||!signup.phone||!signup.username){
+      return
+    }
+
     let response = await authenticateSignup(signupInitialValues);
     
     // if (!response.data) return;
@@ -160,6 +203,8 @@ const loginUser = async () => {
       setErr1(true)
     }
   };
+
+
   return (
     <Dialog
       open={open}
@@ -175,11 +220,10 @@ const loginUser = async () => {
         </Image>
         {account1.view === "login" ? (
           <Wrapper>
-            <TextField variant="standard" label="Enter Username" onChange={onValueChange} name='username'/>
-
+            <TextField variant="standard" label="Enter Username"  id="username" onChange={onValueChange} name='username' value={loginValues.username} type="text" />
             {err && <Error color="red">Invalid Username or password</Error>}
 
-            <TextField variant="standard" label="Enter Password"  onChange={onValueChange} name='password'/>
+            <TextField variant="standard" label="Enter Password"   id="password" onChange={onValueChange} name='password' value={loginValues.password} type="text" />
             <Text>
               By continuing, you agree to flipkart's Terms of Use and Privacy
               Policy
@@ -205,39 +249,66 @@ const loginUser = async () => {
               onChange={onInputChange}
               label="Enter Firstname"
               name="firstname"
-              
+              id="firstname"
+              value={signup.firstname}
+              error={!signup1.firstname}
+              required
+              helperText={!signup1.firstname?"please enter first name":""}
             />
             <TextField
               variant="standard"
               onChange={onInputChange}
               label="Enter Lastname"
               name="lastname"
-              
+              id="lastname"
+              value={signup.lastname}
+              error={!signup1.lastname}
+              required
+              helperText={!signup1.lastname?"please enter last name":""}
             />
             <TextField
               variant="standard"
               onChange={onInputChange}
               label="Enter Username"
               name="username"
+              id="username"
+              value={signup.username}
+              error={!signup1.username}
+              required
+              helperText={!signup1.username?"please enter username":""}
             />
             <TextField
               variant="standard"
               onChange={onInputChange}
               label="Enter Email"
               name="email"
+              id="email"
+              value={signup.email}
+              error={!signup1.email}
+              required
+              helperText={!signup1.email?"please enter email":""}
             />
             <TextField
               variant="standard"
               onChange={onInputChange}
               label="Enter Password"
-              required
               name="password"
+              id="password"
+              value={signup.password}
+              error={!signup1.password}
+              required
+              helperText={!signup1.password?"please enter password":""}
             />
             <TextField
               variant="standard"
               onChange={onInputChange}
               label="Enter Phone"
               name="phone"
+              id="phone"
+              value={signup.phone}
+              required
+              helperText={!signup1.phone?"please enter phone number":""}
+              error={!signup1.phone}
             />
 
             <LoginButton onClick={() => singupUser()}>Continue</LoginButton>
